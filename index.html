@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- 浏览器标签左上角专属小logo -->
+<link rel="shortcut icon" href="logo.jpg" type="image/x-icon">
+<title>登录系统</title>
+
+<!-- 防F12+防右键+防查看源码 -->
+<script>
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+    if(e.key === 'F12') e.preventDefault();
+    if(e.ctrlKey && e.key.toLowerCase() === 'u') e.preventDefault();
+    if(e.ctrlKey && e.shiftKey && e.key === 'I') e.preventDefault();
+    if(e.ctrlKey && e.shiftKey && e.key === 'J') e.preventDefault();
+});
+</script>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #1a1a2e 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.login-box {
+  background: rgba(26, 26, 46, 0.9);
+  padding: 40px 30px;
+  border-radius: 15px;
+  width: 350px;
+  border: 2px solid rgba(0, 212, 255, 0.5);
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+  text-align: center;
+}
+.logo {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: none;
+  margin: 0 auto 20px;
+}
+.login-box h2 {
+  color: #00d4ff;
+  text-align: center;
+  margin-bottom: 30px;
+  margin-top: 10px;
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+}
+.login-box input {
+  width: 100%;
+  height: 45px;
+  margin-bottom: 20px;
+  padding: 0 15px;
+  border: 1px solid rgba(0, 212, 255, 0.5);
+  border-radius: 6px;
+  font-size: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #e0e0e0;
+  transition: all 0.3s ease;
+}
+.login-box input:focus {
+  border-color: #00d4ff;
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+  outline: none;
+}
+.login-box button {
+  width: 100%;
+  height: 45px;
+  background: linear-gradient(45deg, #00d4ff, #00ffcc);
+  color: #1a1a2e;
+  border: none;
+  border-radius: 6px;
+  font-size: 17px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+}
+.login-box button:hover {
+  background: linear-gradient(45deg, #00ffcc, #00d4ff);
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.6);
+  transform: scale(1.05);
+}
+.login-success {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #0f0f23, #00d4ff);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.5s ease;
+}
+.login-success.show {
+  opacity: 1;
+  visibility: visible;
+}
+.typing-text {
+  font-size: 24px;
+  color: #00ffcc;
+  font-family: 'Courier New', monospace;
+  border-right: 2px solid #00ffcc;
+  animation: blink 1s infinite;
+}
+@keyframes blink {
+  0%, 50% { border-color: transparent; }
+  51%, 100% { border-color: #00ffcc; }
+}
+</style>
+</head>
+<body>
+
+<div class="login-box">
+  <h2>系统登录</h2>
+  <input type="text" id="username" placeholder="请输入账号">
+  <input type="password" id="password" placeholder="请输入密码">
+  <button onclick="login()">登录</button>
+  <div id="error-msg" class="error-msg"></div>
+</div>
+
+<div id="login-success" class="login-success">
+  <div id="typing-text" class="typing-text"></div>
+</div>
+
+<script>
+// 多账号配置：格式 账号1|密码1,账号2|密码2,账号3|密码3
+const userList = "admin@c.com|mini462009,user1@scc.com|abc123456";
+
+let loginAttempts = 0;
+let isLocked = false;
+
+function checkLogin(inputUser, inputPwd){
+    let users = userList.split(',');
+    for(let item of users){
+        let [u,p] = item.split('|');
+        if(u === inputUser && p === inputPwd){
+            return true;
+        }
+    }
+    return false;
+}
+
+// 点击登录
+function login(){
+    if (isLocked) {
+        document.getElementById("error-msg").innerText = "登录已被锁定，请稍后再试。";
+        return;
+    }
+    let un = document.getElementById("username").value;
+    let pw = document.getElementById("password").value;
+    if(checkLogin(un,pw)){
+        // 登录成功，显示打字效果
+        const successDiv = document.getElementById("login-success");
+        successDiv.classList.add("show");
+        typeText("欢迎来到iTEL本地通", () => {
+            setTimeout(() => {
+                // 设置标记
+                localStorage.setItem("loginOk", "true");
+                // 跳转到 home.html
+                window.location.href = "home.html";
+            }, 1000);
+        });
+    }else{
+        loginAttempts++;
+        if (loginAttempts >= 3) {
+            isLocked = true;
+            document.getElementById("error-msg").innerText = "密码错误次数过多，登录锁定 30 秒。";
+            setTimeout(() => {
+                isLocked = false;
+                loginAttempts = 0;
+                document.getElementById("error-msg").innerText = "";
+            }, 30000);
+        } else {
+            document.getElementById("error-msg").innerText = "账号或密码错误 (" + loginAttempts + "/3)";
+        }
+    }
+}
+
+function typeText(text, callback) {
+    const element = document.getElementById("typing-text");
+    let index = 0;
+    element.textContent = "";
+    const interval = setInterval(() => {
+        element.textContent += text[index];
+        index++;
+        if (index >= text.length) {
+            clearInterval(interval);
+            if (callback) callback();
+        }
+    }, 100);
+}
+
+// 按回车键登录
+document.getElementById("password").addEventListener("keydown",function(e){
+    if(e.key === "Enter"){
+        login();
+    }
+});
+</script>
+
+</body>
+</html>

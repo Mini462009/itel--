@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 浏览器标签左上角专属小logo -->
+    <link rel="shortcut icon" href="logo.jpg" type="image/x-icon">
+    <title>ITEL</title>
+    <script>
+        // 登录校验 不跟任何代码冲突
+        (function () {
+            if (!localStorage.getItem("loginOk")) {
+                location.href = "index.html";
+            }
+        })();
+    </script>
+    <style>
+        body {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 255, 204, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(0, 174, 255, 0.1) 0%, transparent 50%),
+                linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #1a1a2e 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #e0e0e0;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(circle at 25% 25%, rgba(0, 212, 255, 0.05) 2px, transparent 2px),
+                radial-gradient(circle at 75% 75%, rgba(0, 255, 204, 0.05) 2px, transparent 2px),
+                radial-gradient(circle at 50% 50%, rgba(0, 174, 255, 0.05) 1px, transparent 1px);
+            background-size: 100px 100px, 150px 150px, 200px 200px;
+            background-position: 0 0, 50px 50px, 100px 100px;
+            animation: float 20s linear infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            33% {
+                transform: translateY(-20px) rotate(120deg);
+            }
+
+            66% {
+                transform: translateY(10px) rotate(240deg);
+            }
+
+            100% {
+                transform: translateY(0px) rotate(360deg);
+            }
+        }
+
+        /* 隐藏单选按钮 */
+        input {
+            display: none;
+        }
+
+        /* 外面大容器：五个连在一起，整体圆角 */
+        .menu-wrap {
+            width: 600px;
+            display: flex;
+            border-radius: 10px;
+            /* 整体四个角圆角 */
+            overflow: hidden;
+            /* 把尖角切掉，整体圆润 */
+            margin: 1.5rem auto 0;
+            border: 1px solid white;
+        }
+
+        /* 每一个选项平分宽度，连在一起 */
+        .menu-wrap label {
+            flex: 1;
+            text-align: center;
+            padding: 15px 0;
+            background: linear-gradient(135deg, rgba(0, 123, 255, 0.5), rgba(0, 255, 204, 0.5));
+            backdrop-filter: blur(10px);
+            color: #ffffff;
+            cursor: pointer;
+            font-size: 16px;
+            border-right: 1px solid rgba(0, 255, 204, 0.3);
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            text-shadow: 0 0 8px rgba(0, 255, 204, 0.6);
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-wrap label::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s;
+        }
+
+        .menu-wrap label:hover {
+            background: linear-gradient(135deg, rgba(0, 123, 255, 0.7), rgba(0, 255, 204, 0.7));
+            box-shadow:
+                0 0 20px rgba(0, 212, 255, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            text-shadow: 0 0 12px rgba(0, 255, 204, 0.9);
+        }
+
+        .menu-wrap label:hover::before {
+            left: 100%;
+        }
+
+        /* 最后一个去掉右边边框 */
+        .menu-wrap label:last-child {
+            border-right: none;
+        }
+
+        /* 选中：亮起+底色变深+边框高亮 */
+        #tab1:checked~.menu-wrap label[for="tab1"],
+        #tab2:checked~.menu-wrap label[for="tab2"],
+        #tab3:checked~.menu-wrap label[for="tab3"],
+        #tab4:checked~.menu-wrap label[for="tab4"],
+        #tab5:checked~.menu-wrap label[for="tab5"],
+        #tab6:checked~.menu-wrap label[for="tab6"] {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.9), rgba(0, 255, 204, 0.9));
+            color: #ffffff;
+            font-weight: bold;
+            box-shadow:
+                0 0 25px rgba(0, 212, 255, 0.8),
+                0 0 50px rgba(0, 255, 204, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            text-shadow: 0 0 15px rgba(0, 212, 255, 1);
+            transform: translateY(-3px);
+            border-bottom: 3px solid rgba(0, 255, 204, 0.8);
+        }
+
+        /* 内容区域 */
+        .content {
+            display: none;
+            width: auto;
+            max-width: 100%;
+            margin: 30px auto;
+            padding: 0;
+            font-size: 17px;
+            text-align: center;
+        }
+
+        #tab1:checked~.c1 {
+            display: block;
+        }
+
+        #tab2:checked~.c2 {
+            display: block;
+        }
+
+        #tab3:checked~.c3 {
+            display: block;
+        }
+
+        #tab4:checked~.c4 {
+            display: block;
+        }
+
+        #tab5:checked~.c5 {
+            display: block;
+        }
+
+        #tab6:checked~.c6 {
+            display: block;
+        }
+
+        .box {
+            position: relative;
+            border: 2px solid rgba(0, 212, 255, 0.45);
+            border-radius: 24px;
+            padding: 30px;
+            width: min(980px, calc(100% - 40px));
+            height: auto;
+            margin: 20px auto;
+            background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(22, 33, 62, 0.95) 50%, rgba(15, 52, 96, 0.95) 100%);
+            box-shadow:
+                0 18px 60px rgba(0, 212, 255, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            overflow: hidden;
+        }
+
+        .box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.06), transparent);
+            transition: left 0.8s;
+        }
+
+        .box:hover::before {
+            left: 100%;
+        }
+
+
+        .logo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid rgba(0, 212, 255, 0.55);
+            transition: all 0.5s ease;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+
+        .logo:hover {
+            transform: rotate(360deg) scale(1.1);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
+        }
+
+        .box2 {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin: 0 auto;
+            margin-top: 2rem;
+            width: fit-content;
+            padding: 16px 24px;
+            background: rgba(12, 19, 39, 0.8);
+            border: 1px solid rgba(0, 212, 255, 0.35);
+            border-radius: 18px;
+            box-shadow: 0 18px 40px rgba(0, 212, 255, 0.15);
+            backdrop-filter: blur(12px);
+            position: relative;
+            z-index: 1;
+        }
+
+        .box2 h1 {
+            color: #ffffff;
+            margin: 0;
+            font-size: 24px;
+            letter-spacing: 1.5px;
+        }
+
+        .dong {
+            color: #f5f5f5;
+
+        }
+
+        .ban {
+            background: linear-gradient(to left, #0f0f23, #1a1a2e);
+            width: 100%;
+            height: 35px;
+            position: absolute;
+            top: 115%;
+            left: 0%;
+            text-align: center;
+            color: #00d4ff;
+            text-shadow: 0 0 5px rgba(0, 212, 255, 0.5);
+        }
+
+
+        #hower:hover {
+            background: linear-gradient(135deg, rgb(1, 17, 255), rgba(9, 231, 247, 0.836));
+        }
+
+        .bian {
+            position: absolute;
+            margin-top: 0%;
+            right: 1%;
+            border-radius: 20%;
+            width: 50px;
+            height: 40px;
+            border: none;
+            background: linear-gradient(45deg, #00d4ff, #00ffcc);
+            color: #1a1a2e;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .bian:hover {
+            background: linear-gradient(45deg, #00ffcc, #00d4ff);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.8);
+            transform: scale(1.05);
+        }
+
+        .bianzi:hover {
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.8), 0 0 20px rgba(0, 255, 204, 0.6);
+        }
+
+        .president-card {
+            text-align: center;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ff4757 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 0 20px rgba(255, 71, 87, 0.5);
+            font-weight: bold;
+            border: 2px solid rgba(255, 71, 87, 0.8);
+        }
+
+        .president-card h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .manager-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .manager-card {
+            flex: 1 1 280px;
+            min-width: 260px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(0, 212, 255, 0.35);
+            border-radius: 18px;
+            padding: 22px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.35s ease;
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.08);
+        }
+
+        .manager-card:hover {
+            transform: translateY(-4px);
+            background: rgba(0, 255, 204, 0.1);
+            border-color: rgba(0, 255, 204, 0.7);
+            box-shadow: 0 16px 40px rgba(0, 212, 255, 0.15);
+        }
+
+        .manager-card ins {
+            font-style: normal;
+            color: #00d4ff;
+            font-size: 18px;
+            letter-spacing: 1px;
+        }
+
+        .manager-card p {
+            margin: 10px 0 0;
+            color: #e0e0e0;
+            font-size: 16px;
+        }
+
+        .departments {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            justify-items: center;
+        }
+
+        .button-grid {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+            margin-top: 10px;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .dept-details {
+            margin-top: 20px;
+            text-align: left;
+            background: rgba(26, 26, 46, 0.88);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.18);
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            width: 100%;
+            max-width: 460px;
+        }
+
+        .dept-details h4 {
+            color: #00d4ff;
+            text-shadow: 0 0 5px rgba(0, 212, 255, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .dept-details ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .dept-details li {
+            margin: 6px 0;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        #installation-departments .button-grid {
+            align-items: stretch;
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        .dept-btn {
+            background: linear-gradient(45deg, #00d4ff, #00ffcc);
+            color: #1a1a2e;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+
+        .dept-btn:hover {
+            background: linear-gradient(45deg, #00ffcc, #00d4ff);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.6);
+            transform: scale(1.05);
+        }
+
+        .dept-details {
+            margin-top: 20px;
+            text-align: center;
+            background: rgba(26, 26, 46, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+            border: 1px solid rgba(0, 212, 255, 0.5);
+        }
+
+        .dept-details h4 {
+            color: #00d4ff;
+            text-shadow: 0 0 5px rgba(0, 212, 255, 0.5);
+        }
+
+        .dept-details ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .dept-details li {
+            margin: 5px 0;
+            color: #e0e0e0;
+        }
+
+        .tutorial-btn {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.8), rgba(0, 255, 204, 0.8), rgba(0, 174, 255, 0.8));
+            color: #ffffff;
+            border: 2px solid rgba(0, 212, 255, 0.6);
+            border-radius: 25px;
+            padding: 15px 30px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow:
+                0 0 20px rgba(0, 212, 255, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+            display: inline-block;
+            margin: 20px 0;
+        }
+
+        .tutorial-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .tutorial-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 255, 204, 0.9), rgba(0, 212, 255, 0.9), rgba(0, 174, 255, 0.9));
+            box-shadow:
+                0 0 30px rgba(0, 212, 255, 0.6),
+                0 0 60px rgba(0, 255, 204, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px) scale(1.05);
+            border-color: rgba(0, 255, 204, 0.8);
+        }
+
+        .tutorial-btn:hover::before {
+            left: 100%;
+        }
+
+        .tutorial-btn:active {
+            transform: translateY(0) scale(0.98);
+            box-shadow:
+                0 0 15px rgba(0, 212, 255, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+
+    <A href="index.html"><button id="hower" class="bian">back/返回</button></A>
+
+    <input type="radio" name="m" id="tab1"checked>
+    <input type="radio" name="m" id="tab2">
+    <input type="radio" name="m" id="tab3">
+    <input type="radio" name="m" id="tab4" >
+    <input type="radio" name="m" id="tab5">
+    <input type="radio" name="m" id="tab6">
+
+    <div class="box2"><img src="logo.jpg" alt="itel logo" class="logo">
+        <h1 class="bianzi">iTEL本地通SIM卡</h1>
+    </div>
+
+    <div class="menu-wrap">
+        <label for="tab1" id="hower">首页</label>
+        <label for="tab2" id="hower">人员信息</label>
+        <label for="tab3" id="hower">公司规章制度</label>
+        <label for="tab4" id="hower">充值教程</label>
+        <label for="tab5" id="hower">账目教程</label>
+        <label for="tab6" id="hower">信息</label>
+    </div>
+
+    <div class="content c1">
+        <div class="box">
+            <!-- 把 ul 再包一层 div，给外层加样式 -->
+            <div style="padding: 20px;">
+                <ul style="text-align: left; padding-left: 20px; list-style: disc; line-height: 1.8; font-size: 14px;">
+                    <li>您好🤗</li>
+                    <li>本人开发本网页，主要用于给公司新人做教学指导使用，目前公司缺少相关教程素材，也没人整理制作，所以由我牵头搭建了这个内部教程网页。</li>
+                    <li>网页中包含公司人员信息介绍（介绍各岗位人员）、充值教程及相关链接、记账系统使用说明等内容。</li>
+                    <li>本人初次学习制作网页，页面尚有诸多不完善之处，还请各位多多谅解。本网页制作也借助 AI 辅助完成，如有不足之处，敬请大家包容理解。
+                    </li>
+                </ul>
+            </div>
+            <h3><ins>公司必备常用软件和部门介绍</ins></h3>
+            <ul style="text-align: left; 
+               padding-left: 20px; list-style: disc; 
+               line-height: 1.8; 
+               font-size: 15px;">
+                <li>wechat/微信</li>
+                <li>Telegram</li>
+                <li style="font-size: 13px;">未安装该软件，可在应用商店搜索下载使用</li>
+                <li>Wechat/微信是给代理用户办理充值业务的必备工具，
+                    没有安装微信将无法进行充值操作。</li>
+                <li>Telegram主要用来和代理对接业务、日常沟通联系、
+                    每月对账核算,平时工作大部分业务都以这款软件为主,建议务必安装使用。
+                </li>
+                <li>公司内部设有前台组、管理员组、装维组、推销人员组、财务组和媒体组。<br>
+                    前台组负责日常接待和事务对接。<br>
+                    管理员组负责整体管理与工作统筹。<br>
+                    装维组专门负责安装、故障修复和售后维护工作。<br>
+                    推销人员组负责业务推广、拓展代理客户。<br>
+                    (财务/会记组)负责日常对账、收支核算与账务统计。<br>
+                    媒体组负责公司宣传、抖音账号运营和宣传素材制作。</li>
+                <hr>
+                <h3><ins>问题反馈渠道</ins></h3>
+                <li>若您在工作中遇到系统操作相关疑问，可联系【装维经理（熊哥）】咨询处理。</li>
+                <li>若涉及客户对接相关业务问题，可联系【营业厅经理(Tina li)】对接解决。</li>
+                <li>为避免占用上述人员工作资源，您也可向公司资深员工咨询了解相关事宜。</li>
+                <h3>人员信息查询指引</h3>
+                <li>如需了解各岗位人员信息，可在「人员信息」板块点击对应部门 / 负责人条目，即可查看该部门人员名单及岗位职责。</li>
+            </ul>
+
+        </div>
+    </div>
+
+    <div class="content c2">
+        <div class="box">
+            <ins style="font-size: 25px; display: block; text-align: center; margin-bottom: 20px;">人员信息</ins>
+            <div id="president" class="president-card">
+                <h2>总裁</h2>
+                <p><ins>威总</ins></p>
+            </div>
+            <div class="manager-row">
+                <div id="operations-manager" class="manager-card" onclick="toggleDepartments('operations')">
+                    <ins>运营部经理</ins>
+                    <p>Tinali</p>
+                </div>
+                <div id="installation-manager" class="manager-card" onclick="toggleDepartments('installation')">
+                    <ins>装维经理</ins>
+                    <p>熊哥</p>
+                </div>
+            </div>
+            <div id="operations-departments" class="departments" style="display: none;">
+                <div class="button-grid">
+                    <button class="dept-btn" onclick="showDepartment('hr')">Hr/人事</button>
+                    <button class="dept-btn" onclick="showDepartment('frontdesk')">前台/客服组</button>
+                    <button class="dept-btn" onclick="showDepartment('accounting')">会计组</button>
+                    <button class="dept-btn" onclick="showDepartment('marketing')">市场营销组</button>
+                    <button class="dept-btn" onclick="showDepartment('media')">媒体组</button>
+                </div>
+                <div id="dept-details" class="dept-details" style="display: none;"></div>
+            </div>
+            <div id="installation-departments" class="departments" style="display: none;">
+                <div class="button-grid">
+                    <button class="dept-btn" onclick="showDepartment('installation')">装维组</button>
+                </div>
+                <div id="dept-details-install" class="dept-details" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+    <div class="content c3">
+        <div class="box">公司规章制度
+            <ul style="text-align:left">
+                <li>公司营业时间= 缅时(7:30AM至11:30PM)
+                    /中时(9:00AM至1:00AM)
+                </li>
+                <li>全体员工每月可自行安排两天休息时间，休息日期可自主申请，当月如有休息则取消满勤奖，全月无休息方可领取满勤奖
+                    <br>
+                    每月月底、当月 1 日、2 日为业务繁忙时段，全体人员一律不得在此期间申请休息
+                </li><br>
+                <li>前台人员可自行安排休息时间，前提是必须有其他前台人员在岗顶替；
+                    <br>
+                    每月月底、当月 1 日、2 日为业务繁忙时段，全体人员一律不得在此期间休息
+                </li><br>
+                <li>因月底、次月 1 日、2 日在岗工作繁忙，请全体人员提前自备餐食，做好饮食准备，避免在岗期间挨饿影响工作。</li><br>
+                <li>全体员工上班须穿制服、佩戴工作证。
+                    未按规定执行者，递增罚款：
+                    首次 10 元，二次 20 元，三次 30 元，依次累加。</li>
+            </ul>
+
+        </div>
+    </div>
+    <div class="content c4">
+        <div class="box">
+            <ul style="text-align: left;">
+                <h3>业务流程说明</h3>
+                <li>相关业务网站链接因信息安全管控要求，暂不对外公开，如需获取，请联系相关人员申领。</li>
+                <li>具体操作流程可点击页面下方按钮查看。</li>
+                <h4>充值系统操作教程目录</h4>
+                <li>用户信息查询操作：讲解搜索用户信息的方法，及搜索所需的关键信息说明。</li>
+                <li>开卡业务办理流程：规范开卡操作步骤与注意事项。</li>
+                <li>用户充值操作指引。</li>
+                <li>流量包购买与套餐变更：介绍流量包购买方法，及套餐变更所需材料与操作步骤。</li>
+                <li>批量业务操作说明：讲解批量开卡、批量充值等高效操作流程。</li>
+                <li>操作失误补救流程：说明操作错误后的处理步骤与上报要求。</li>
+               
+            </ul>
+            <a href="page1.html"><button class="tutorial-btn">充值系统教程</button></a>
+        </div>
+    </div>
+    <div class="content c5">
+        <div class="box">
+            <ul style="text-align: left;">
+                <h3>业务流程说明</h3>
+                <li>相关业务网站链接因信息安全管控要求，暂不对外公开，如需获取，请联系相关人员申领。</li>
+                <li>具体操作流程可点击页面下方按钮查看。</li>
+                <h4>财务账目管理教程目录</h4>
+                <li>账目分类规范：如营业厅和代理区分</li>
+                <li>记账系统功能说明：介绍系统界面模块、基础功能及各字段含义</li>
+                <li>标准记账流程：分步演示日常账务录入、审核与提交的完整流程</li>
+                <li>账务修改与更正操作：规范错账更正的权限、流程与注意事项。</li>
+                <li>日报表编制指引：讲解日报表的填报内容、数据核对及提交要求</li>
+                <li>代理账务对账流程：讲解与代理方核对账务、往来对账的规范步骤</li>
+            </ul>
+            <a href="page2.html"><button class="tutorial-btn">记账系统/做账教程</button></a>
+        </div>
+    </div>
+    <div class="content c6">
+        <div class="box">  
+            <ul style="text-align: left; padding-left: 20px;">
+                <li>公司营业时间:中国时间:9-00Am到10:30Pm</li>
+
+                <li>反馈建议：如有改进建议，请联系管理员组。</li>
+            <li><abbr title="09448551147/8870039">作者联系方式</abbr></li>
+
+            </ul>
+            <h3>感谢您的使用！</h3>
+        </div>
+    </div>
+
+    <div class="ban">&copy;iTEL小方2026📶</div>
+
+    <script>
+        let currentDept = null;
+
+        function toggleDepartments(type) {
+            const operations = document.getElementById('operations-departments');
+            const installation = document.getElementById('installation-departments');
+            const details = document.getElementById('dept-details');
+            const detailsInstall = document.getElementById('dept-details-install');
+            if (type === 'operations') {
+                operations.style.display = operations.style.display === 'none' ? 'flex' : 'none';
+                installation.style.display = 'none';
+                details.style.display = 'none';
+                detailsInstall.style.display = 'none';
+                currentDept = null;
+            } else if (type === 'installation') {
+                installation.style.display = installation.style.display === 'none' ? 'flex' : 'none';
+                operations.style.display = 'none';
+                details.style.display = 'none';
+                detailsInstall.style.display = 'none';
+                currentDept = null;
+            }
+        }
+
+        function showDepartment(dept) {
+            const details = document.getElementById('dept-details');
+            const detailsInstall = document.getElementById('dept-details-install');
+            if (currentDept === dept) {
+                details.style.display = 'none';
+                detailsInstall.style.display = 'none';
+                currentDept = null;
+                return;
+            }
+            let content = '';
+            if (dept === 'hr') {
+                content = '<h4>Hr/人事</h4><p>KOphyo</p>';
+            } else if (dept === 'frontdesk') {
+                content = '<h4>前台/客服组</h4><ul><li>Min khantzaw</li><li>Su ying</li><li>Thein aung</li></ul>';
+            } else if (dept === 'accounting') {
+                content = '<h4>会计组</h4><ul><li>小雪</li><li>小丽</li></ul>';
+            } else if (dept === 'marketing') {
+                content = '<h4>市场营销组</h4><ul><li>Khin Thamder Aung</li><li>Win lin htet</li><li>Tin Nandar Aung</li><li>Aik Pao</li></ul>';
+            } else if (dept === 'media') {
+                content = '<h4>媒体组</h4><ul><li>Ko Htet (leader)</li><li>Ma Khin meme Daw</li><li>小林</li><li>ma yee mon</li></ul>';
+            } else if (dept === 'installation') {
+                detailsInstall.innerHTML = '<h4>装维组</h4><ul><li>KO Myo</li><li>KO Oo</li><li>Sai Aung Pyae</li><li>Sai Lu</li></ul>';
+                detailsInstall.style.display = 'block';
+                details.style.display = 'none';
+                currentDept = dept;
+                return;
+            }
+            details.innerHTML = content;
+            details.style.display = 'block';
+            detailsInstall.style.display = 'none';
+            currentDept = dept;
+        }
+    </script>
+</body>
+
+</html>
